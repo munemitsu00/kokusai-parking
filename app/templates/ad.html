@@ -1,0 +1,6 @@
+{% if ads_publisher and ad_slots.get(position, {}).get('enabled') and ad_slots.get(position, {}).get('id') %}
+<div class="ad-block" aria-label="広告"><span class="ad-label">広告</span>
+ <ins class="adsbygoogle" style="display:block" data-ad-client="{{ ads_publisher | e }}" data-ad-slot="{{ ad_slots[position]['id'] | e }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+ <script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>
+</div>
+{% endif %}

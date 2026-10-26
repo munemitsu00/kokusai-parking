@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}{% if mode == 'register' %}無料会員登録{% elif mode == 'login' %}ログイン{% elif mode == 'forgot' %}パスワード再設定{% else %}新しいパスワード{% endif %}{% endblock %}
+{% block content %}<div class="auth-section"><div class="auth-aside"><div class="eyebrow">JOIN PARK OKINAWA</div><h1>まちの駐車場を、<br><em>もっと便利に。</em></h1><p>地域の情報を持ち寄って、<br>使いやすい駐車場マップを育てよう。</p><div class="auth-decoration">P<span>+</span></div></div>
+<div class="auth-box"><div class="auth-overline">PARK OKINAWA ACCOUNT</div><h2>{% if mode == 'register' %}新規会員登録{% elif mode == 'login' %}おかえりなさい{% elif mode == 'forgot' %}パスワード再設定{% else %}新しいパスワードを設定{% endif %}</h2>
+<p class="muted body-small">{% if mode == 'register' %}登録無料。駐車場の情報を提供してポイントをためられます。{% elif mode == 'login' %}メールアドレスとパスワードでログイン。{% else %}登録済みのメールアドレスを使って手続きできます。{% endif %}</p>
+<form class="form-stack" method="post" action="/{% if mode == 'register' %}register{% elif mode == 'login' %}login{% elif mode == 'forgot' %}forgot-password{% else %}reset-password{% endif %}">
+<input type="hidden" name="csrf" value="{{ csrf }}">
+{% if mode == 'register' %}<label>ニックネーム<input name="nickname" required minlength="2" maxlength="40" autocomplete="nickname" placeholder="例：沖縄ドライバー"></label>{% endif %}
+{% if mode in ['register','login','forgot'] %}<label>メールアドレス<input name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>{% endif %}
+{% if mode in ['register','login','reset'] %}<label>パスワード<input type="password" name="password" required {% if mode!='login' %}minlength="10"{% endif %} autocomplete="{% if mode=='login' %}current-password{% else %}new-password{% endif %}" placeholder="{% if mode=='login' %}パスワード{% else %}10文字以上で入力{% endif %}"></label>{% endif %}
+{% if mode=='reset' %}<input type="hidden" name="token" value="{{ token }}">{% endif %}
+<button class="button button-primary full-width" type="submit">{% if mode=='register' %}無料で登録する{% elif mode=='login' %}ログイン{% else %}送信する{% endif %} →</button></form>
+<div class="auth-links">{% if mode == 'login' %}<a href="/forgot-password">パスワードを忘れた</a><span>・</span><a href="/register">新規会員登録</a>{% elif mode=='register' %}<a href="/login">すでにアカウントをお持ちの方</a>{% else %}<a href="/login">ログイン画面に戻る</a>{% endif %}</div>
+{% if mode=='register' %}<p class="form-hint">登録すると、<a href="/terms">利用規約</a>・<a href="/privacy">プライバシーポリシー</a>に同意したものとみなされます。</p>{% endif %}
+</div></div>{% endblock %}

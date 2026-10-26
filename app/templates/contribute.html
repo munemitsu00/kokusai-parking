@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% block title %}駐車場の情報提供{% endblock %}
+{% block content %}<div class="page-shell narrow"><a href="/" class="backlink">← 駐車場を探す</a><div class="page-heading"><span class="section-kicker">CONTRIBUTE</span><h1>駐車場の情報を教える<span class="heading-dot">.</span></h1><p>料金の変更や、未掲載の駐車場を見つけたら教えてください。管理者が確認後、有益な情報にはポイントを付与します。</p></div>
+<div class="panel"><form action="/contribute" method="post" enctype="multipart/form-data" class="form-stack"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label>情報の種類<select id="contributeKind" name="kind" required><option value="price">料金が変わった</option><option value="new">新しい駐車場を見つけた</option><option value="hours">営業時間が変わった</option><option value="entrance">入口の位置が違う</option><option value="photo">写真を追加したい</option><option value="closed">閉鎖・休業している</option><option value="other">その他</option></select></label>
+<label id="existingParking">対象の駐車場<select name="parking_id" id="parkingSelect"><option value="">選択してください</option>{% for lot in lots %}<option value="{{ lot.id }}">{{ lot.name }}</option>{% endfor %}</select></label>
+<div id="newParkingFields" hidden><label>新しい駐車場の名前<input name="parking_name" placeholder="例：○○パーキング"></label><label>所在地<input name="address" placeholder="例：那覇市牧志1-1-1"></label></div>
+<label>確認した日付<input type="date" name="checked_at"></label>
+<label>情報の詳細<textarea name="content" minlength="10" maxlength="4000" required rows="6" placeholder="例：料金看板を確認したところ、最大料金が800円から900円に変わっていました。"></textarea></label>
+<label>現地写真（任意・5MBまで）<input type="file" name="photo" accept="image/png,image/jpeg,image/webp"><small>人物・車両ナンバーが映らないようにしてください。GPS等の写真メタデータは除去されます。</small></label>
+<div class="inline-info">投稿内容は管理者の確認まで公開されません。情報の正確性を確認できた場合にポイントが付与されます。広告のクリック等はポイント対象外です。</div>
+<button class="button button-primary full-width" type="submit">確認して情報を送信する →</button></form></div></div>
+{% endblock %}
+{% block scripts %}<script>const kind=document.getElementById('contributeKind'),ex=document.getElementById('existingParking'),np=document.getElementById('newParkingFields'),sel=document.getElementById('parkingSelect');function toggleNew(){const yes=kind.value==='new';ex.hidden=yes;np.hidden=!yes;sel.required=!yes}kind.addEventListener('change',toggleNew);toggleNew();</script>{% endblock %}

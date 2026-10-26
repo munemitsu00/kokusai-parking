@@ -1,0 +1,17 @@
+# Render Blueprint: read-only public preview; no user data is collected.
+services:
+  - type: web
+    name: kokusai-parking-preview
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /healthz
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEMO_MODE
+        value: "true"
+      - key: SESSION_SECURE
+        value: "true"
+      - key: SECRET_KEY
+        generateValue: true

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}国際通り周辺の駐車場検索{% endblock %}
+{% block head %}<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHfhk9E+gZmGc=" crossorigin=""/>{% endblock %}
+{% block content %}
+<section class="hero"><div class="hero-text"><div class="eyebrow"><span class="eyebrow-pin">●</span> NAHA, OKINAWA · KOKUSAI STREET</div>
+<h1>いい駐車場、<br><em>すぐ見つかる。</em></h1>
+<p>国際通り周辺の駐車場を、料金・場所・条件から。<br>地元目線で、あなたにちょうどいい1台分を。</p>
+<div class="hero-stats"><span><b>{{ count }}</b> <small>掲載駐車場</small></span><span class="stat-divider"></span><span><b>無料</b> <small>登録なしで検索OK</small></span></div>
+</div><div class="hero-accent" aria-hidden="true"><span class="hero-parking">P</span><span class="ring ring-one"></span><span class="ring ring-two"></span><span class="ring ring-three"></span></div>
+</section>
+{% set position='top' %}{% include 'ad.html' %}
+<section class="finder-container" id="parking-search"><div class="section-intro"><div><span class="section-kicker">FIND YOUR SPOT</span><h2>駐車場を探す<span class="heading-dot">.</span></h2></div><span class="listing-count">{{ count }} PARKING SPOTS</span></div>
+<div class="search-layout">
+<div class="finder-sidebar"><div class="filters-panel">
+<label for="searchText" class="field-label">キーワードで探す</label>
+<div class="search-input-wrap"><span class="search-icon">⌕</span><input id="searchText" type="search" placeholder="駐車場名・エリア・住所" autocomplete="off"></div>
+<div class="form-row"><div><label for="operatorFilter" class="field-label">運営会社</label><select id="operatorFilter"><option value="">すべて</option>{% for op in operators %}<option value="{{ op }}">{{ op }}</option>{% endfor %}</select></div>
+<div><label for="sortFilter" class="field-label">並び順</label><select id="sortFilter"><option value="name">名称順</option><option value="capacity">台数が多い順</option><option value="new">新着順</option></select></div></div>
+<div class="filter-bottom"><span class="filter-caption">料金の正確な比較は、現地で確認した料金から順次対応します。</span></div>
+</div>
+<div class="result-count-row"><b><span id="visibleCount">{{ count }}</span>件</b> の駐車場が見つかりました <button class="text-reset" id="clearFilters">リセット ↻</button></div>
+<div id="parkingList" class="parking-list">
+{% for p in lots %}
+<a class="parking-card" href="/parking/{{ p.id }}" data-name="{{ p.name | lower }}" data-address="{{ p.address | lower }}" data-operator="{{ p.operator }}" data-capacity="{{ p.capacity or 0 }}" data-id="{{ p.id }}">
+<div class="parking-icon">P</div><div class="parking-content"><div class="parking-card-top"><span class="operator-chip">{{ p.operator or '一般駐車場' }}</span>{% if p.onsite_checked_at %}<span class="verified-chip">✓ 現地確認済</span>{% else %}<span class="pending-chip">現地未確認</span>{% endif %}</div>
+<h3>{{ p.name }}</h3><p class="parking-address"><span>⌖</span> {{ p.address }}</p>
+<div class="parking-meta"><span>◷ {{ p.hours or '営業時間未確認' }}</span>{% if p.capacity is not none %}<span>▣ {{ p.capacity }}台</span>{% endif %}</div>
+<div class="parking-bottom"><span class="pricing-mini">{% if p.pricing_description %}{{ p.pricing_description | truncate(58) }}{% else %}料金情報を確認中{% endif %}</span><span class="detail-link">詳細を見る <b>↗</b></span></div></div></a>
+{% if loop.index == 3 %}{% set position='list' %}{% include 'ad.html' %}{% endif %}
+{% endfor %}
+</div><p id="noResults" class="empty-state" hidden>該当する駐車場が見つかりません。条件を変えてお試しください。</p>
+</div>
+<div class="map-column"><div class="map-toolbar"><span><span class="map-live-dot"></span> 国際通り周辺 MAP</span><span>📍 入口確定の場所のみピン表示</span></div>
+<div id="mainMap" class="main-map" role="region" aria-label="駐車場マップ"></div>
+<div class="map-footnote"><span>ⓘ</span> 入口未確認の駐車場は一覧からGoogleマップで住所検索できます。地図タイル © OpenStreetMap contributors</div></div>
+</div></section>
+{% if not demo_mode %}<section class="contribute-banner"><div><span class="section-kicker">LOCAL KNOWLEDGE, BETTER PARKING</span><h2>あなたの情報が、<br>誰かの助けになる。</h2><p>料金が変わった、新しい駐車場を見つけた。<br>そのひと手間で国際通りの駐車場探しがもっと便利に。</p><a href="/contribute" class="button button-light">駐車場の情報を提供する <span>↗</span></a></div><div class="contribute-graphic" aria-hidden="true">P<span>+</span></div></section>{% endif %}
+<div class="data-disclaimer"><strong>掲載情報について</strong><p>掲載中の一部データは運営会社の公開情報をもとにしたテスト登録です。料金・営業状況・収容台数は変更される場合があります。必ず現地看板等をご確認ください。実際の入口位置が未確認の駐車場はマップに表示されません。</p></div>
+{% set position='footer' %}{% include 'ad.html' %}
+{% endblock %}
+{% block scripts %}<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZrgfp6xJplQhG9x1mS0tW8P5M=" crossorigin=""></script><script>window.PARKING_MARKERS = {{ markers | tojson }};</script><script src="/static/map.js?v=4" defer></script>{% endblock %}
