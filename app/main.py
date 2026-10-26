@@ -21,6 +21,7 @@ from fastapi.templating import Jinja2Templates
 from PIL import Image, ImageOps, UnidentifiedImageError
 from .db import ROOT, init_db, db_path, query, execute, transaction, utcnow, setting, balance, audit, seed_file
 from .pricing import estimate, validate_config, DEFAULT_RATE
+from .comparison import reference_position, public_estimate
 from .security import (hash_pw,check_pw,get_session,make_session,set_session,require_csrf,
                        require_user,user_from_request,csrf_token,send_auth_email,consume_email_token)
 
@@ -126,12 +127,39 @@ def healthz():
 
 # ------------ Public parking pages ------------
 @app.get('/',response_class=HTMLResponse)
-def home(request:Request):
+def home(request:Request, arrive:str='', leave:str=''):
     lots=query('SELECT * FROM parkings WHERE is_published=1 AND is_closed=0 ORDER BY updated_at DESC, id')
-    marks=[{'id':p['id'],'name':p['name'],'lat':p['lat'],'lng':p['lng'],'verified':bool(p['entrance_confirmed'])}
-           for p in lots if p['lat'] is not None and p['lng'] is not None]
+    selected = bool(arrive or leave)
+    error = None
+    fees = {}
+    if selected:
+        try:
+            start = datetime.fromisoformat(arrive)
+            end = datetime.fromisoformat(leave)
+            if start.tzinfo or end.tzinfo or not (0 < (end-start).total_seconds() <= 7*24*3600):
+                raise ValueError()
+        except (ValueError, TypeError):
+            error = '入庫・出庫日時を正しく指定してください（1分〜7日以内）。'
+            selected = False
+        else:
+            rules = {r['parking_id']:json.loads(r['config_json']) for r in query('SELECT parking_id,config_json FROM rate_rules')}
+            for p in lots:
+                fees[p['id']] = public_estimate(p,rules.get(p['id'], DEFAULT_RATE),arrive,leave)
+            lots.sort(key=lambda p:(fees[p['id']]['amount'] is None,
+                                     fees[p['id']]['amount'] if fees[p['id']]['amount'] is not None else 0,
+                                     p['name']))
+    marks=[]
+    for p in lots:
+        lat,lng,approx=reference_position(p)
+        if lat is not None and lng is not None:
+            marks.append({'id':p['id'],'name':p['name'],'lat':lat,'lng':lng,'approx':approx,
+                          'verified':bool(p['entrance_confirmed']),
+                          'price':fees.get(p['id'],{}).get('amount'),
+                          'address':p['address']})
     operators=sorted(set(p['operator'] for p in lots if p['operator']))
-    return view(request,'home.html',lots=lots,markers=marks,operators=operators,count=len(lots))
+    return view(request,'home.html',lots=lots,markers=marks,operators=operators,count=len(lots),
+                arrive=arrive if selected else '',leave=leave if selected else '',
+                fees=fees,comparison_enabled=selected,comparison_error=error)
 
 @app.get('/parking/{pid}',response_class=HTMLResponse)
 def parking_detail(request:Request,pid:int,arrive:str='',leave:str=''):
@@ -141,7 +169,7 @@ def parking_detail(request:Request,pid:int,arrive:str='',leave:str=''):
     cfg=json.loads(cfg_row['config_json']) if cfg_row else DEFAULT_RATE
     result=None
     if arrive and leave:
-        result=estimate(arrive,leave,cfg)
+        result=public_estimate(lot,cfg,arrive,leave) if is_demo_mode() else estimate(arrive,leave,cfg)
     return view(request,'parking.html',p=lot,rate=cfg,result=result,arrive=arrive,leave=leave)
 
 @app.get('/api/parkings')

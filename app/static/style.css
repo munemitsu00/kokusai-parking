@@ -16,3 +16,24 @@ input:not([type='checkbox']):not([type='radio']),textarea,select{width:100%;padd
 @media(max-width:550px){.site-header{height:67px}.header-inner{padding:0 4%}.brand-symbol{width:35px;height:35px;font-size:22px;border-radius:10px}.brand-text{font-size:11px}.brand-text small{font-size:8px}.main-nav{gap:8px;font-size:10px}.nav-signup{padding:10px 8px}.nav-signup span{display:none}.nav-user{padding:9px 7px}.nav-admin{font-size:10px;padding:8px 6px}.nav-login{padding:8px 4px}.hero{min-height:284px;padding-top:39px;padding-bottom:35px}.hero h1{font-size:37px}.hero-stats{gap:13px;margin-top:22px}.hero-stats b{font-size:17px}.hero-stats small{font-size:9px}.finder-container{padding:38px 4% 42px}.section-intro{margin-bottom:17px}.section-intro h2{font-size:27px}.listing-count{font-size:9px}.map-column{border-radius:11px}.main-map{height:315px}.map-toolbar{min-height:42px;padding:0 10px}.map-toolbar>span:nth-child(2){font-size:8px}.filters-panel{padding:17px}.parking-card{padding:15px 11px;gap:10px}.parking-icon{width:33px;min-width:33px;height:33px;font-size:16px}.parking-bottom{display:block}.detail-link{margin-top:8px}.contribute-banner{margin-bottom:45px;min-height:260px}.contribute-banner h2{font-size:26px}.contribute-graphic{font-size:190px;right:0}.data-disclaimer{display:block;margin-bottom:45px}.data-disclaimer strong{display:block;margin-bottom:8px}.footer-inner{padding:35px 5% 19px}.footer-bottom{display:block;line-height:2}.footer-bottom span{display:block}.footer-links{gap:14px}.page-shell{padding:26px 4% 65px}.page-heading h1{font-size:31px}.panel{padding:19px;border-radius:12px}.form-row{grid-template-columns:1fr}.detail-header{display:block}.detail-status{margin-top:12px}.detail-map-placeholder{height:220px}.stat-grid,.stat-grid.four{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.stat-card{padding:16px;gap:10px}.stat-card strong{font-size:27px}.stat-card>span{font-size:10px}.auth-section{display:block;margin:0 auto 50px;padding:0}.auth-aside{border-radius:0;padding:29px 6%;min-height:170px}.auth-aside h1{font-size:25px;margin:7px 0}.auth-aside p{display:none}.auth-decoration{left:auto;right:25px;bottom:-100px;font-size:180px;opacity:.25}.auth-box{padding:36px 6%;border-radius:0;border:0}.auth-box h2{font-size:26px}.save-bar{position:sticky;bottom:0;margin:0 -3%;border-radius:0;padding:11px 13px}.save-bar>span{font-size:10px}.save-bar .button{padding:11px}.rule-fields{grid-template-columns:1fr 1fr}.admin-nav{gap:3px}.admin-nav a{padding:8px 9px;font-size:10px}.panel-heading{flex-wrap:wrap}.review-buttons{flex-direction:column}.review-buttons button{width:100%}}
 
 .map-empty-tip{position:absolute;bottom:77px;left:50%;transform:translateX(-50%);z-index:401;background:#fffef9ed;color:#376155;box-shadow:0 3px 13px #164c461c;border-radius:8px;padding:11px 14px;font-size:11px;white-space:nowrap;max-width:90%;text-overflow:ellipsis;overflow:hidden}
+/* Date-based parking comparison */
+.compare-form{background:#edf8f0;padding:17px;border:1px solid #cce8d5;border-radius:12px;margin:0 0 20px}
+.compare-form-title{font-size:15px;font-weight:900;color:#0e5847;margin-bottom:12px}
+.compare-date-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.compare-date-row label{min-width:0}
+.compare-date-row input{width:100%;min-width:0;font-size:12px;padding:10px 6px;margin-top:5px;background:#fff}
+.compare-button{display:flex;width:100%;margin-top:9px}
+.compare-caution{font-size:10px;line-height:1.65;color:#6a806d;margin:10px 0 0}
+.compare-message{font-size:11px;color:#17684d;margin:12px 0 0;line-height:1.7}
+.compare-message a{text-decoration:underline;font-weight:bold}
+.compare-error{font-size:12px;color:#ab332e;margin-top:8px}
+.compare-result{margin:8px 0 10px;padding:8px 10px;background:#eef9f1;border-radius:8px;display:flex;flex-direction:column;gap:4px}
+.compare-result strong{font-size:19px;font-weight:900;color:#166b51}
+.compare-result strong.compare-unavailable{font-size:13px;color:#805c38}
+.compare-result small{font-size:10px;color:#65786b;line-height:1.6}
+.map-marker-approx{background:#db9b23;color:#201600}
+.map-warning{font-size:11px;color:#936409;font-weight:700}
+.map-fallback{height:100%;min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;padding:25px;text-align:center;font-size:13px;color:#3b5750}
+.map-fallback p{line-height:1.8;font-size:11px}
+.map-fallback a{color:#006d52;text-decoration:underline;font-weight:700}
+@media(max-width:550px){.compare-date-row{grid-template-columns:1fr}.compare-form{padding:14px}}

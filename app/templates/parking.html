@@ -8,10 +8,10 @@
 <a class="button button-white" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query={{ p.address | urlencode }}">Googleマップで住所を開く ↗</a></div>
 <div class="panel"><div class="panel-heading"><h2>駐車料金</h2><span class="small-caption">PRICING</span></div><p class="pricing-description">{{ p.pricing_description or '料金情報は確認中です' }}</p>
 <div class="caution-note">※掲載情報は参考情報です。現地の料金看板・精算機の表示が優先されます。</div></div>
-<div class="panel"><div class="panel-heading"><h2>駐車料金シミュレーター</h2><span class="small-caption">ESTIMATOR</span></div><p class="muted body-small">入庫・出庫日時から概算料金を表示。確認済みの料金ルールのみ計算します。</p>
+<div class="panel"><div class="panel-heading"><h2>駐車料金シミュレーター</h2><span class="small-caption">ESTIMATOR</span></div><p class="muted body-small">入庫・出庫日時から概算料金を表示。管理者が確認した料金に加え、テスト施設の一部では公開情報による暫定料金を表示します。</p>
 <form method="get" class="form-stack" id="estimateForm"><div class="form-row"><label>入庫日時<input type="datetime-local" name="arrive" value="{{ arrive }}" required></label><label>出庫日時<input type="datetime-local" name="leave" value="{{ leave }}" required></label></div><button class="button button-primary" type="submit">料金を計算する →</button></form>
 {% if result %}<div class="result-price">{% if result.amount is not none %}<span>概算合計</span><strong>¥{{ '{:,}'.format(result.amount) }}</strong>{% for seg in result.breakdown %}<div class="breakdown"><span>{{ seg.label }}</span><b>¥{{ '{:,}'.format(seg.yen) }}</b></div>{% endfor %}{% else %}<strong class="result-unavailable">料金要確認</strong><p>{{ result.reason }}</p>{% endif %}</div>{% endif %}
-{% if not rate.verified_for_calculation %}<p class="estimator-note">現在、この駐車場の自動計算は現地料金を検証中です。</p>{% endif %}
+{% if not rate.verified_for_calculation %}<p class="estimator-note">料金計算は現地未確認です。比較画面で参考額を表示できる一部施設も、現地精算額とは異なる場合があります。</p>{% endif %}
 </div>
 </div>
 <aside class="detail-aside"><div class="panel"><h2>施設情報</h2><dl class="fact-list"><div><dt>運営会社</dt><dd>{{ p.operator or '不明' }}</dd></div><div><dt>営業時間</dt><dd>{{ p.hours or '未確認' }}</dd></div><div><dt>収容台数</dt><dd>{{ p.capacity if p.capacity is not none else '未確認' }}{% if p.capacity is not none %}台{% endif %}</dd></div><div><dt>支払い方法</dt><dd>{{ p.payment_methods or '未確認' }}</dd></div><div><dt>入口位置</dt><dd>{{ '現地確認済み' if p.entrance_confirmed else '未確認' }}</dd></div><div><dt>現地確認日</dt><dd>{{ p.onsite_checked_at or '未確認' }}</dd></div></dl>

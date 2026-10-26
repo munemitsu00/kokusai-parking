@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}国際通り周辺の駐車場検索{% endblock %}
-{% block head %}<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHfhk9E+gZmGc=" crossorigin=""/>{% endblock %}
+{% block head %}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>{% endblock %}
 {% block content %}
 <section class="hero"><div class="hero-text"><div class="eyebrow"><span class="eyebrow-pin">●</span> NAHA, OKINAWA · KOKUSAI STREET</div>
 <h1>いい駐車場、<br><em>すぐ見つかる。</em></h1>
@@ -14,28 +14,36 @@
 <div class="finder-sidebar"><div class="filters-panel">
 <label for="searchText" class="field-label">キーワードで探す</label>
 <div class="search-input-wrap"><span class="search-icon">⌕</span><input id="searchText" type="search" placeholder="駐車場名・エリア・住所" autocomplete="off"></div>
+<form method="get" action="/" class="compare-form" id="compareForm">
+<div class="compare-form-title">⏱ 駐車時間で最安値を探す</div>
+<div class="compare-date-row"><label class="field-label" for="arriveTime">入庫日時<input type="datetime-local" name="arrive" id="arriveTime" value="{{ arrive }}" required></label><label class="field-label" for="leaveTime">出庫日時<input type="datetime-local" name="leave" id="leaveTime" value="{{ leave }}" required></label></div>
+<button type="submit" class="button button-primary compare-button">この時間の安い駐車場を探す ↗</button>
+{% if comparison_enabled %}<p class="compare-message">{{ arrive | replace('T',' ') }}〜{{ leave | replace('T',' ') }} の料金順に表示中。<a href="/">比較を解除</a></p>{% elif comparison_error %}<p class="compare-error" role="alert">{{ comparison_error }}</p>{% endif %}
+<p class="compare-caution">現地未確認の料金は暫定参考額。複雑な料金や日付をまたぐ料金は「要確認」と表示します。</p>
+</form>
 <div class="form-row"><div><label for="operatorFilter" class="field-label">運営会社</label><select id="operatorFilter"><option value="">すべて</option>{% for op in operators %}<option value="{{ op }}">{{ op }}</option>{% endfor %}</select></div>
-<div><label for="sortFilter" class="field-label">並び順</label><select id="sortFilter"><option value="name">名称順</option><option value="capacity">台数が多い順</option><option value="new">新着順</option></select></div></div>
-<div class="filter-bottom"><span class="filter-caption">料金の正確な比較は、現地で確認した料金から順次対応します。</span></div>
+<div><label for="sortFilter" class="field-label">並び順</label><select id="sortFilter">{% if comparison_enabled %}<option value="price" selected>料金が安い順</option>{% endif %}<option value="name">名称順</option><option value="capacity">台数が多い順</option><option value="new">新着順</option></select></div></div>
+<div class="filter-bottom"><span class="filter-caption">地図のピンは住所付近を示す参考位置です。実際の入口は現地で確認してください。</span></div>
 </div>
 <div class="result-count-row"><b><span id="visibleCount">{{ count }}</span>件</b> の駐車場が見つかりました <button class="text-reset" id="clearFilters">リセット ↻</button></div>
 <div id="parkingList" class="parking-list">
 {% for p in lots %}
-<a class="parking-card" href="/parking/{{ p.id }}" data-name="{{ p.name | lower }}" data-address="{{ p.address | lower }}" data-operator="{{ p.operator }}" data-capacity="{{ p.capacity or 0 }}" data-id="{{ p.id }}">
+<a class="parking-card" href="/parking/{{ p.id }}" data-name="{{ p.name | lower }}" data-address="{{ p.address | lower }}" data-operator="{{ p.operator }}" data-capacity="{{ p.capacity or 0 }}" data-id="{{ p.id }}" data-price="{{ fees[p.id].amount if comparison_enabled and fees[p.id].amount is not none else '' }}">
 <div class="parking-icon">P</div><div class="parking-content"><div class="parking-card-top"><span class="operator-chip">{{ p.operator or '一般駐車場' }}</span>{% if p.onsite_checked_at %}<span class="verified-chip">✓ 現地確認済</span>{% else %}<span class="pending-chip">現地未確認</span>{% endif %}</div>
 <h3>{{ p.name }}</h3><p class="parking-address"><span>⌖</span> {{ p.address }}</p>
 <div class="parking-meta"><span>◷ {{ p.hours or '営業時間未確認' }}</span>{% if p.capacity is not none %}<span>▣ {{ p.capacity }}台</span>{% endif %}</div>
+{% if comparison_enabled %}<div class="compare-result">{% if fees[p.id].amount is not none %}<strong>参考料金 ¥{{ '{:,}'.format(fees[p.id].amount) }}</strong><small>公開情報に基づく暫定概算・現地未確認</small>{% else %}<strong class="compare-unavailable">料金要確認</strong><small>{{ fees[p.id].reason }}</small>{% endif %}</div>{% endif %}
 <div class="parking-bottom"><span class="pricing-mini">{% if p.pricing_description %}{{ p.pricing_description | truncate(58) }}{% else %}料金情報を確認中{% endif %}</span><span class="detail-link">詳細を見る <b>↗</b></span></div></div></a>
 {% if loop.index == 3 %}{% set position='list' %}{% include 'ad.html' %}{% endif %}
 {% endfor %}
 </div><p id="noResults" class="empty-state" hidden>該当する駐車場が見つかりません。条件を変えてお試しください。</p>
 </div>
-<div class="map-column"><div class="map-toolbar"><span><span class="map-live-dot"></span> 国際通り周辺 MAP</span><span>📍 入口確定の場所のみピン表示</span></div>
+<div class="map-column"><div class="map-toolbar"><span><span class="map-live-dot"></span> 国際通り周辺 MAP</span><span>📍 参考位置を表示（入口とは異なります）</span></div>
 <div id="mainMap" class="main-map" role="region" aria-label="駐車場マップ"></div>
-<div class="map-footnote"><span>ⓘ</span> 入口未確認の駐車場は一覧からGoogleマップで住所検索できます。地図タイル © OpenStreetMap contributors</div></div>
+<div class="map-footnote"><span>ⓘ</span> 黄色のピンは町丁目周辺の目安で、駐車場の敷地・入口を示すものではありません。詳細ページの住所検索から正確な場所をご確認ください。地図データ © OpenStreetMap contributors</div></div>
 </div></section>
 {% if not demo_mode %}<section class="contribute-banner"><div><span class="section-kicker">LOCAL KNOWLEDGE, BETTER PARKING</span><h2>あなたの情報が、<br>誰かの助けになる。</h2><p>料金が変わった、新しい駐車場を見つけた。<br>そのひと手間で国際通りの駐車場探しがもっと便利に。</p><a href="/contribute" class="button button-light">駐車場の情報を提供する <span>↗</span></a></div><div class="contribute-graphic" aria-hidden="true">P<span>+</span></div></section>{% endif %}
-<div class="data-disclaimer"><strong>掲載情報について</strong><p>掲載中の一部データは運営会社の公開情報をもとにしたテスト登録です。料金・営業状況・収容台数は変更される場合があります。必ず現地看板等をご確認ください。実際の入口位置が未確認の駐車場はマップに表示されません。</p></div>
+<div class="data-disclaimer"><strong>掲載情報について</strong><p>掲載中の一部データは運営会社の公開情報をもとにしたテスト登録です。料金・営業状況・収容台数は変更される場合があります。必ず現地看板等をご確認ください。位置が未確認の施設はエリアの参考位置を黄色のピンで表示します。実際の入口位置とは異なるため、ナビには使用しないでください。</p></div>
 {% set position='footer' %}{% include 'ad.html' %}
 {% endblock %}
-{% block scripts %}<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZrgfp6xJplQhG9x1mS0tW8P5M=" crossorigin=""></script><script>window.PARKING_MARKERS = {{ markers | tojson }};</script><script src="/static/map.js?v=4" defer></script>{% endblock %}
+{% block scripts %}<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" onerror="this.onerror=null;this.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'"></script><script>window.PARKING_MARKERS = {{ markers | tojson }};</script><script src="/static/map.js?v=6" defer></script>{% endblock %}
